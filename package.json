@@ -1,0 +1,28 @@
+{
+  "name": "with-next-mint-nft",
+  "private": true,
+  "version": "0.0.86",
+  "scripts": {
+    "dev": "next dev -p 20150",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@rainbow-me/rainbowkit": "workspace:*",
+    "@tanstack/react-query": "^5.28.4",
+    "framer-motion": "^6.3.3",
+    "next": "^14.2.3",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "viem": "^2.8.12",
+    "wagmi": "^2.5.11"
+  },
+  "devDependencies": {
+    "@types/node": "20.12.8",
+    "@types/react": "^18.3.0",
+    "eslint": "^8.15.0",
+    "eslint-config-next": "^14.2.3",
+    "typescript": "5.4.2"
+  }
+}
