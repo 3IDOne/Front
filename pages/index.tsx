@@ -10,9 +10,16 @@ import {
 } from 'wagmi';
 import { abi } from '../contract-abi';
 import FlipCard, { BackCard, FrontCard } from '../components/FlipCard';
+import { useChainId } from 'wagmi'
+
 
 const contractConfig = {
   address: '0x39039e8994e1e58fc4a56c59ef1b497eebba7811',
+  abi,
+} as const;
+
+const contractConfig2 = {
+  address: '0x470a7B6581bBFC46ac5Bc28752ADAe4D6cf2fF3b',
   abi,
 } as const;
 
@@ -23,12 +30,23 @@ const Home: NextPage = () => {
   const [totalMinted, setTotalMinted] = React.useState(0n);
   const { isConnected } = useAccount();
 
+  const [userAddress, setUserAddress] = React.useState('');
+  const [domainName, setDomainName] = React.useState('');
+
   const {
     data: hash,
     writeContract: mint,
     isPending: isMintLoading,
     isSuccess: isMintStarted,
     error: mintError,
+  } = useWriteContract();
+
+  const {
+    data: hash2,
+    writeContract: mint2,
+    isPending: isMintLoading2,
+    isSuccess: isMintStarted2,
+    error: mintError2,
   } = useWriteContract();
 
   const { data: totalSupplyData } = useReadContract({
@@ -55,6 +73,9 @@ const Home: NextPage = () => {
 
   const isMinted = txSuccess;
 
+  const config = useChainId()
+
+
   return (
     <div className="page">
       <div className="container">
@@ -63,8 +84,50 @@ const Home: NextPage = () => {
             <h1>NFT Demo Mint</h1>
             <p style={{ margin: '12px 0 24px' }}>
               {Number(totalMinted)} minted so far!
+              Current Chain ID: {Number(config)}
             </p>
             <ConnectButton />
+
+            <div style={{ display: 'flex', flexDirection: 'column', marginTop: 16 }}>
+  <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+    <label htmlFor="userAddress" style={{ marginRight: 8, fontWeight: 'bold' }}>
+      Address:
+    </label>
+    <input
+      type="text"
+      id="userAddress"
+      value={userAddress}
+      onChange={(e) => setUserAddress(e.target.value)}
+      style={{
+        padding: '8px 12px',
+        border: '1px solid #ccc',
+        borderRadius: 4,
+        outline: 'none',
+        fontSize: '16px',
+        flex: 1,
+      }}
+    />
+  </div>
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <label htmlFor="domainName" style={{ marginRight: 8, fontWeight: 'bold' }}>
+      Domain Name:
+    </label>
+    <input
+      type="text"
+      id="domainName"
+      value={domainName}
+      onChange={(e) => setDomainName(e.target.value)}
+      style={{
+        padding: '8px 12px',
+        border: '1px solid #ccc',
+        borderRadius: 4,
+        outline: 'none',
+        fontSize: '16px',
+        flex: 1,
+      }}
+    />
+  </div>
+</div>
 
             {mintError && (
               <p style={{ marginTop: 24, color: '#FF6257' }}>
@@ -84,12 +147,27 @@ const Home: NextPage = () => {
                 className="button"
                 data-mint-loading={isMintLoading}
                 data-mint-started={isMintStarted}
-                onClick={() =>
-                  mint?.({
-                    ...contractConfig,
-                    functionName: 'mintSubdomain',
-                    args: ['0x89F3b42F941A88D3da886ae5002f58BB8a5F56ea','testsite2']
-                  })
+                onClick={() => {
+                  if (config===11155111)
+                    {
+                      mint?.({
+                        ...contractConfig,
+                        functionName: 'mintSubdomain',
+                        args: [`0x${userAddress.substring(2)}`, domainName],
+                      })
+                    }
+
+                    if (config===11155420)
+                      {
+                        mint2?.({
+                          ...contractConfig2,
+                          functionName: 'mintSubdomain',
+                          args: [`0x${userAddress.substring(2)}`, domainName],
+                        })
+                      }
+                    
+                }
+                                   
                 }
               >
                 {isMintLoading && 'Waiting for approval'}
@@ -100,6 +178,7 @@ const Home: NextPage = () => {
           </div>
         </div>
 
+        {/* Existing FlipCard component */}
         <div style={{ flex: '0 0 auto' }}>
           <FlipCard>
             <FrontCard isCardFlipped={isMinted}>
