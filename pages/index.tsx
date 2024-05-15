@@ -81,7 +81,11 @@ const Home: NextPage = () => {
       <div className="container">
         <div style={{ flex: '1 1 auto' }}>
           <div style={{ padding: '24px 24px 24px 0' }}>
-            <h1>NFT Demo Mint</h1>
+            <h1>Web
+            <span style={{ color: 'blue' }}>3ID</span>
+              entity for Every
+            <span style={{ color: 'blue' }}>One</span>
+            </h1>
             <p style={{ margin: '12px 0 24px' }}>
               {Number(totalMinted)} minted so far!
               Current Chain ID: {Number(config)}
