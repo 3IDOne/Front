@@ -11,6 +11,20 @@ import {
 import { abi } from '../contract-abi';
 import FlipCard, { BackCard, FrontCard } from '../components/FlipCard';
 import { useChainId } from 'wagmi'
+import { WorkerRequest } from '../types'
+import { useDebounce } from '../hooks/useDebounce'
+import { useFetch } from '../hooks/useFetch'
+import { useAccountEffect } from 'wagmi'
+import { useConnect } from 'wagmi'
+import { type UseAccountParameters } from 'wagmi'
+import { type UseAccountReturnType } from 'wagmi'
+import { useSignMessage } from 'wagmi'
+import { Helper, Link } from '../styles'
+
+
+
+
+
 
 
 const contractConfig = {
@@ -29,9 +43,16 @@ const Home: NextPage = () => {
 
   const [totalMinted, setTotalMinted] = React.useState(0n);
   const { isConnected } = useAccount();
+  const { address } = useAccount();
+
+  const { data, variables, signMessage } = useSignMessage()
+
+
 
   const [userAddress, setUserAddress] = React.useState('');
   const [domainName, setDomainName] = React.useState('');
+  const [description, setDescription] = React.useState<string | undefined>(undefined)
+
 
   const {
     data: hash,
@@ -65,6 +86,7 @@ const Home: NextPage = () => {
     },
   });
 
+
   React.useEffect(() => {
     if (totalSupplyData) {
       setTotalMinted(totalSupplyData);
@@ -74,6 +96,33 @@ const Home: NextPage = () => {
   const isMinted = txSuccess;
 
   const config = useChainId()
+
+  const regex = new RegExp('^[a-z0-9-]+$')
+  const debouncedName = useDebounce(domainName, 500)
+  const enabled = !!debouncedName && regex.test(debouncedName)
+
+  const requestBody: WorkerRequest = {
+    name: `${debouncedName}.3id.one`,
+    owner: address!,
+    addresses: { '60': address },
+    texts: { description },
+    signature: {
+      hash: data!,
+      message: 'Register',
+    },
+  }
+
+  const {
+    data: gatewayData,
+    error: gatewayError,
+    isLoading: gatewayIsLoading,
+  } = useFetch(data && 'https://ens-gateway.popns.workers.dev/set', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  })
 
 
   return (
@@ -131,6 +180,26 @@ const Home: NextPage = () => {
       }}
     />
   </div>
+
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <label htmlFor="Description" style={{ marginRight: 8, fontWeight: 'bold' }}>
+    Description:
+    </label>
+    <input
+      type="text"
+      id="Description"
+      value={description}
+      onChange={(e) => setDescription(e.target.value)}
+      style={{
+        padding: '8px 12px',
+        border: '1px solid #ccc',
+        borderRadius: 4,
+        outline: 'none',
+        fontSize: '16px',
+        flex: 1,
+      }}
+    />
+  </div>
 </div>
 
             {mintError && (
@@ -163,13 +232,9 @@ const Home: NextPage = () => {
 
                     if (config===11155420)
                       {
-                        mint2?.({
-                          ...contractConfig2,
-                          functionName: 'mintSubdomain',
-                          args: [`0x${userAddress.substring(2)}`, domainName],
-                        })
-                      }
-                    
+                          signMessage({message: `Register`,})
+                        //  signMessage({message: `Register ${debouncedName}.offchaindemo.eth`,})
+                      }            
                 }
                                    
                 }
@@ -181,6 +246,31 @@ const Home: NextPage = () => {
             )}
           </div>
         </div>
+
+        {gatewayError ? (
+  <div style={{ color: 'red' }}>
+    {gatewayError.message === 'Conflict'
+      ? 'Somebody already registered that name'
+      : 'Something went wrong'}
+  </div>
+) : gatewayData ? (
+  <div>
+    <p>
+      Visit the{' '}
+      <a
+        href={`https://ens.app/${debouncedName}.offchaindemo.eth`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        ENS Manager
+      </a>{' '}
+      to see your name
+    </p>
+  </div>
+) : !!debouncedName && !enabled ? (
+  <div style={{ color: 'red' }}>Name must be lowercase alphanumeric</div>
+) : null}
+
 
         {/* Existing FlipCard component */}
         <div style={{ flex: '0 0 auto' }}>
