@@ -54,17 +54,7 @@ const Home: NextPage = () => {
     error: mintError,
   } = useWriteContract();
 
-  const {
-    data: gatewayData,
-    error: gatewayError,
-    isLoading: gatewayIsLoading,
-  } = useFetch(hash && 'https://ens-gateway.popns.workers.dev/set', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestBody),
-  })
+
   
 
 
@@ -118,6 +108,18 @@ const Home: NextPage = () => {
       message: 'test',
     },
   }
+
+  const {
+    data: gatewayData,
+    error: gatewayError,
+    isLoading: gatewayIsLoading,
+  } = useFetch(hash && 'https://ens-gateway.popns.workers.dev/set', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  })
 
 
   return (
