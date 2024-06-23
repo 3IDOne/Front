@@ -46,6 +46,26 @@ const Home: NextPage = () => {
 
   const { data, variables, signMessage } = useSignMessage()
 
+  const {
+    data: hash,
+    writeContract: mint,
+    isPending: isMintLoading,
+    isSuccess: isMintStarted,
+    error: mintError,
+  } = useWriteContract();
+
+  const {
+    data: gatewayData,
+    error: gatewayError,
+    isLoading: gatewayIsLoading,
+  } = useFetch(hash && 'https://ens-gateway.popns.workers.dev/set', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  })
+  
 
 
   const [userAddress, setUserAddress] = React.useState('');
@@ -55,13 +75,7 @@ const Home: NextPage = () => {
 
 
 
-  const {
-    data: hash,
-    writeContract: mint,
-    isPending: isMintLoading,
-    isSuccess: isMintStarted,
-    error: mintError,
-  } = useWriteContract();
+
 
   const { data: totalSupplyData } = useReadContract({
     ...contractConfig,
@@ -105,18 +119,7 @@ const Home: NextPage = () => {
     },
   }
 
-  const {
-    data: gatewayData,
-    error: gatewayError,
-    isLoading: gatewayIsLoading,
-  } = useFetch(hash && 'https://ens-gateway.popns.workers.dev/set', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestBody),
-  })
-  
+
 
 
   return (
@@ -185,6 +188,7 @@ const Home: NextPage = () => {
       outline: 'none',
       fontSize: '16px',
       flex: 1,
+      
     }}
   />
   <select
@@ -242,6 +246,7 @@ const Home: NextPage = () => {
                   if (config===11155111)
                     {
                       signMessage({message: `test`,})
+
                       mint?.({
                         ...contractConfig,
                         functionName: 'mintSubdomain',                        

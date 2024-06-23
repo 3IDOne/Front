@@ -54,7 +54,7 @@ export function useFetch<T = unknown>(
 
     const fetchData = async () => {
       dispatch({ type: 'loading' })
-
+      
       // If a cache exists for this url, return it
       if (cache.current[url]) {
         dispatch({ type: 'fetched', payload: cache.current[url] })
