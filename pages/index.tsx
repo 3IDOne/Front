@@ -109,13 +109,14 @@ const Home: NextPage = () => {
   const enabled = !!debouncedName && regex.test(debouncedName)
 
   const requestBody: WorkerRequest = {
-    name: `${debouncedName}.offchaindemo.eth`,
+    name: `${debouncedName}.${selectedExtension}`,
     owner: address!,
     addresses: { '60': address },
     texts: { description },
     signature: {
       hash: data!,
-      message: variables?.message!,
+      message: 'test',
+    },
   }
 
 
