@@ -19,16 +19,15 @@ import { useConnect } from 'wagmi'
 import { type UseAccountParameters } from 'wagmi'
 import { type UseAccountReturnType } from 'wagmi'
 import { useSignMessage } from 'wagmi'
-import { Helper, Link } from '../styles'
-
-
-
+//import { Helper, Link } from '../styles'
+import Link from 'next/link';
+import styles from './index.module.css'; // Import CSS module
 
 
 
 
 const contractConfig = {
-  address: '0x39039e8994e1e58fc4a56c59ef1b497eebba7811',
+  address: '0xf5f2c09eb63cb5696612e8448c3482359d32c9e2',
   abi,
 } as const;
 
@@ -52,6 +51,8 @@ const Home: NextPage = () => {
   const [userAddress, setUserAddress] = React.useState('');
   const [domainName, setDomainName] = React.useState('');
   const [description, setDescription] = React.useState<string | undefined>(undefined)
+  const [selectedExtension, setSelectedExtension] = React.useState('.3id.one');
+
 
 
   const {
@@ -60,14 +61,6 @@ const Home: NextPage = () => {
     isPending: isMintLoading,
     isSuccess: isMintStarted,
     error: mintError,
-  } = useWriteContract();
-
-  const {
-    data: hash2,
-    writeContract: mint2,
-    isPending: isMintLoading2,
-    isSuccess: isMintStarted2,
-    error: mintError2,
   } = useWriteContract();
 
   const { data: totalSupplyData } = useReadContract({
@@ -102,13 +95,13 @@ const Home: NextPage = () => {
   const enabled = !!debouncedName && regex.test(debouncedName)
 
   const requestBody: WorkerRequest = {
-    name: `${debouncedName}.3id.one`,
+    name: `${debouncedName}.${selectedExtension}`,
     owner: address!,
     addresses: { '60': address },
     texts: { description },
     signature: {
       hash: data!,
-      message: 'Register',
+      message: 'test',
     },
   }
 
@@ -116,18 +109,33 @@ const Home: NextPage = () => {
     data: gatewayData,
     error: gatewayError,
     isLoading: gatewayIsLoading,
-  } = useFetch(data && 'https://ens-gateway.popns.workers.dev/set', {
+  } = useFetch(hash && 'https://ens-gateway.popns.workers.dev/set', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(requestBody),
   })
+  
 
 
   return (
     <div className="page">
+            
       <div className="container">
+      <header className={styles.header}>
+        <nav className={styles.nav}>
+          <Link href="/" className={styles.logoLink}>
+            <Image src="/logo.png" alt="Website Logo" width={190} height={70} />
+          </Link>
+          <ul className={styles.navList}>
+            <li><Link href="/why-3id" className={styles.navLink}>Why 3ID</Link></li>
+            <li><Link href="/faq" className={styles.navLink}>FAQ</Link></li>
+            <li><Link href="/docs" className={styles.navLink}>Documentations</Link></li>
+            <li><ConnectButton /></li>
+          </ul>
+        </nav>
+      </header>
         <div style={{ flex: '1 1 auto' }}>
           <div style={{ padding: '24px 24px 24px 0' }}>
             <h1>Web
@@ -142,11 +150,11 @@ const Home: NextPage = () => {
             <ConnectButton />
 
             <div style={{ display: 'flex', flexDirection: 'column', marginTop: 16 }}>
-  <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-    <label htmlFor="userAddress" style={{ marginRight: 8, fontWeight: 'bold' }}>
-      Address:
-    </label>
-    <input
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+            <label htmlFor="userAddress" style={{ marginRight: 8, fontWeight: 'bold' }}>
+            Address:
+            </label>
+      <input
       type="text"
       id="userAddress"
       value={userAddress}
@@ -162,24 +170,33 @@ const Home: NextPage = () => {
     />
   </div>
   <div style={{ display: 'flex', alignItems: 'center' }}>
-    <label htmlFor="domainName" style={{ marginRight: 8, fontWeight: 'bold' }}>
-      Domain Name:
-    </label>
-    <input
-      type="text"
-      id="domainName"
-      value={domainName}
-      onChange={(e) => setDomainName(e.target.value)}
-      style={{
-        padding: '8px 12px',
-        border: '1px solid #ccc',
-        borderRadius: 4,
-        outline: 'none',
-        fontSize: '16px',
-        flex: 1,
-      }}
-    />
-  </div>
+  <label htmlFor="domainName" style={{ marginRight: 8, fontWeight: 'bold' }}>
+    Domain Name:
+  </label>
+  <input
+    type="text"
+    id="domainName"
+    value={domainName}
+    onChange={(e) => setDomainName(e.target.value)}
+    style={{
+      padding: '8px 12px',
+      border: '1px solid #ccc',
+      borderRadius: 4,
+      outline: 'none',
+      fontSize: '16px',
+      flex: 1,
+    }}
+  />
+  <select
+    value={selectedExtension}
+    onChange={(e) => setSelectedExtension(e.target.value as string)}
+    style={{ marginLeft: 8, padding: '8px 4px', border: '1px solid #ccc', borderRadius: 4 }}
+  >
+    <option value=".3id.one">.3id.one</option>
+    <option value=".popns.eth">.popns.eth</option>
+    <option value=".0-8.xyz">.0-8.xyz</option>
+  </select>
+</div>
 
   <div style={{ display: 'flex', alignItems: 'center' }}>
     <label htmlFor="Description" style={{ marginRight: 8, fontWeight: 'bold' }}>
@@ -220,13 +237,15 @@ const Home: NextPage = () => {
                 className="button"
                 data-mint-loading={isMintLoading}
                 data-mint-started={isMintStarted}
+                
                 onClick={() => {
                   if (config===11155111)
                     {
+                      signMessage({message: `test`,})
                       mint?.({
                         ...contractConfig,
-                        functionName: 'mintSubdomain',
-                        args: [`0x${userAddress.substring(2)}`, domainName],
+                        functionName: 'mintSubdomain',                        
+                        args: [`0x${userAddress.substring(2)}`, domainName+selectedExtension],
                       })
                     }
 
@@ -247,8 +266,8 @@ const Home: NextPage = () => {
           </div>
         </div>
 
-        {gatewayError ? (
-  <div style={{ color: 'red' }}>
+      {gatewayError ? (
+      <div style={{ color: 'red' }}>
     {gatewayError.message === 'Conflict'
       ? 'Somebody already registered that name'
       : 'Something went wrong'}
