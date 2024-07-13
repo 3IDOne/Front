@@ -26,6 +26,7 @@ import styles from './index.module.css'; // Import CSS module
 
 
 
+
 const contractConfig = {
   address: '0xf5f2c09eb63cb5696612e8448c3482359d32c9e2',
   abi,
